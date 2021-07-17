@@ -30,7 +30,7 @@ class Home extends StatefulWidget {
 }
 
 class _HomeState extends State<Home> with TickerProviderStateMixin {
-  late AnimationController _controller;
+  AnimationController? _controller;
   bool voice_button_clicked = false;
 
   Widget animatedButton() {
@@ -38,7 +38,7 @@ class _HomeState extends State<Home> with TickerProviderStateMixin {
         onTap: () {
           setState(() {
             voice_button_clicked = false;
-            _controller.dispose();
+            _controller!.dispose();
           });
         },
         child: Center(
@@ -57,7 +57,7 @@ class _HomeState extends State<Home> with TickerProviderStateMixin {
               child: ScaleTransition(
                   scale: Tween(begin: 0.95, end: 1.0).animate(
                     CurvedAnimation(
-                      parent: _controller,
+                      parent: _controller!,
                       curve: const CurveWave(),
                     ),
                   ),
@@ -74,7 +74,7 @@ class _HomeState extends State<Home> with TickerProviderStateMixin {
   Widget afterButton() {
     return CustomPaint(
       painter: CirclePainter(
-        _controller,
+        _controller!,
         color: Colors.blueAccent,
       ),
       child: SizedBox(
@@ -136,7 +136,6 @@ class _HomeState extends State<Home> with TickerProviderStateMixin {
 
   @override
   void dispose() {
-    _controller.dispose();
     super.dispose();
   }
 

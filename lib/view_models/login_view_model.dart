@@ -95,7 +95,7 @@ class LoginViewModel extends FireBaseModel {
         var snapShot = await _fireBaseModel.firebaseDbService.instance
             .collection('users')
             .doc(_fireBaseModel.auth.currentUser!.uid)
-            .get(GetOptions(source: Source.cache));
+            .get(GetOptions(source: Source.serverAndCache));
 
         snapShot.data()!["phone_number"].toString().isNotEmpty
             ? Navigator.of(context).pushAndRemoveUntil(

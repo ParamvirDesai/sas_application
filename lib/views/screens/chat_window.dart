@@ -290,27 +290,46 @@ class ChatWindowSate extends State<ChatWindow> {
         "color3": Colors.grey
       });
     }
+
     var whoAddedMeList = await widget.chatWindowViewModel.getWhoAddedMeList();
 
-    for (var whoAddedMeListDetails in whoAddedMeList) {
-      int counter = 0;
-      for (var user in users) {
-        counter += 1;
-        if (user['userId'] != whoAddedMeListDetails['userId'] &&
-            users.length == counter) {
-          users.add({
-            "emergencyContactName": whoAddedMeListDetails['Name'],
-            "emergencyContactNumber": whoAddedMeListDetails['Phone'],
-            "userId": whoAddedMeListDetails['userId'],
-            "color": Colors.grey,
-            "color2": Colors.grey,
-            "color3": Colors.orangeAccent
-          });
-        } else if (user['userId'] == whoAddedMeListDetails['userId']) {
-          users[counter - 1]["color3"] = Colors.orangeAccent;
-        }
+    whoAddedMeList.forEach((element) {
+      var userDetails =
+          users.where((x) => x['userId'] == element['userId']).single;
+
+      userDetails['color3'] = Colors.orangeAccent;
+
+      if (users.any((x) => x['userId'] != element['userId'])) {
+        users.add({
+          "emergencyContactName": element['Name'],
+          "emergencyContactNumber": element['Phone'],
+          "userId": element['userId'],
+          "color": Colors.grey,
+          "color2": Colors.grey,
+          "color3": Colors.orangeAccent
+        });
       }
-    }
+    });
+
+    // for (var whoAddedMeListDetails in whoAddedMeList) {
+    //   int counter = 0;
+    //   for (var user in users) {
+    //     counter += 1;
+    //     if (user['userId'] != whoAddedMeListDetails['userId'] &&
+    //         users.length == counter) {
+    //       users.add({
+    //         "emergencyContactName": whoAddedMeListDetails['Name'],
+    //         "emergencyContactNumber": whoAddedMeListDetails['Phone'],
+    //         "userId": whoAddedMeListDetails['userId'],
+    //         "color": Colors.grey,
+    //         "color2": Colors.grey,
+    //         "color3": Colors.orangeAccent
+    //       });
+    //     } else if (user['userId'] == whoAddedMeListDetails['userId']) {
+    //       users[counter - 1]["color3"] = Colors.orangeAccent;
+    //     }
+    //   }
+    // }
 
     return users;
   }

@@ -1,7 +1,7 @@
 import 'dart:async';
 import 'dart:io' show Platform;
+import 'package:flutter_native_contact_picker/flutter_native_contact_picker.dart';
 import 'package:flutter_sms/flutter_sms.dart';
-import 'package:contact_picker/contact_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_dialogs/flutter_dialogs.dart';

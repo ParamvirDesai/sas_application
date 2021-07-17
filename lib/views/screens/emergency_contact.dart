@@ -2,14 +2,13 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_dialogs/flutter_dialogs.dart';
+import 'package:flutter_native_contact_picker/flutter_native_contact_picker.dart';
 import 'package:sas_application/uniformity/custom_bottom_nav_bar.dart';
 import 'package:sas_application/uniformity/style.dart';
 import 'package:sas_application/view_models/emergency_contact_view_model.dart';
 import 'package:stacked/stacked.dart';
 import 'package:intl/intl.dart';
 import '../../enums.dart';
-// ignore: import_of_legacy_library_into_null_safe
-import 'package:contact_picker/contact_picker.dart';
 
 class EmergencyContactScreen extends StatelessWidget {
   @override
@@ -104,8 +103,8 @@ class _EmergencyContactScreenAppState extends State<EmergencyContactScreenApp>
               await widget.emergencyContactViewModel.getContactDetails(context);
               setState(() {
                 _contact = widget.emergencyContactViewModel.contact;
-                contactName = _contact!.fullName;
-                contactNumber = _contact!.phoneNumber.number.toString();
+                contactName = _contact!.fullName!;
+                contactNumber = _contact!.phoneNumbers!.first.toString();
                 if (contactInformation.isEmpty) {
                   sameContact = false;
                 } else {
