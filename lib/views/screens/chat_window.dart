@@ -45,6 +45,7 @@ class ChatWindowSate extends State<ChatWindow> {
   @override
   void initState() {
     super.initState();
+
   }
 
   Widget buildAppScreenLogo() {
@@ -146,7 +147,7 @@ class ChatWindowSate extends State<ChatWindow> {
           ),
           Expanded(
             child: FutureBuilder<List>(
-                future: _getUsers(),
+                future: widget.chatWindowViewModel.getUsers(),
                 builder: (ctx, snapShots) {
                   if (snapShots.connectionState == ConnectionState.waiting) {
                     return Center(
@@ -265,72 +266,5 @@ class ChatWindowSate extends State<ChatWindow> {
         ])),
         bottomNavigationBar:
             CustomBottomNavBar(selectedMenu: MenuState.message));
-  }
-
-  Future<List> _getUsers() async {
-    List users = [];
-
-    var dataShots = await FirebaseFirestore.instance
-        .collection("users")
-        .doc(FirebaseAuth.instance.currentUser!.uid)
-        .collection("emergencyContacts")
-        .get(GetOptions(source: Source.cache));
-
-    var data = dataShots.docs;
-    for (var map in data) {
-      users.add({
-        "emergencyContactName": map['emergencyContactName'],
-        "emergencyContactNumber": map['emergencyContactNumber'],
-        "userId": map['emergencyContactUserId'],
-        "color": map['emergencyContactUserId'] == ""
-            ? Colors.redAccent
-            : Colors.grey,
-        "color2":
-            map['emergencyContactUserId'] == "" ? Colors.grey : Colors.green,
-        "color3": Colors.grey
-      });
-    }
-
-    var whoAddedMeList = await widget.chatWindowViewModel.getWhoAddedMeList();
-
-    whoAddedMeList.forEach((element) {
-      var userDetails =
-          users.where((x) => x['userId'] == element['userId']).single;
-
-      userDetails['color3'] = Colors.orangeAccent;
-
-      if (users.any((x) => x['userId'] != element['userId'])) {
-        users.add({
-          "emergencyContactName": element['Name'],
-          "emergencyContactNumber": element['Phone'],
-          "userId": element['userId'],
-          "color": Colors.grey,
-          "color2": Colors.grey,
-          "color3": Colors.orangeAccent
-        });
-      }
-    });
-
-    // for (var whoAddedMeListDetails in whoAddedMeList) {
-    //   int counter = 0;
-    //   for (var user in users) {
-    //     counter += 1;
-    //     if (user['userId'] != whoAddedMeListDetails['userId'] &&
-    //         users.length == counter) {
-    //       users.add({
-    //         "emergencyContactName": whoAddedMeListDetails['Name'],
-    //         "emergencyContactNumber": whoAddedMeListDetails['Phone'],
-    //         "userId": whoAddedMeListDetails['userId'],
-    //         "color": Colors.grey,
-    //         "color2": Colors.grey,
-    //         "color3": Colors.orangeAccent
-    //       });
-    //     } else if (user['userId'] == whoAddedMeListDetails['userId']) {
-    //       users[counter - 1]["color3"] = Colors.orangeAccent;
-    //     }
-    //   }
-    // }
-
-    return users;
   }
 }

@@ -39,7 +39,7 @@ class LoginViewModel extends FireBaseModel {
         var snapShot = await _fireBaseModel.firebaseDbService.instance
             .collection('users')
             .doc(_fireBaseModel.auth.currentUser!.uid)
-            .get(GetOptions(source: Source.cache));
+            .get(GetOptions(source: Source.serverAndCache));
 
         snapShot.data()!["phone_number"].toString().isNotEmpty
             ? Navigator.of(context).pushAndRemoveUntil(
@@ -95,14 +95,14 @@ class LoginViewModel extends FireBaseModel {
         var snapShot = await _fireBaseModel.firebaseDbService.instance
             .collection('users')
             .doc(_fireBaseModel.auth.currentUser!.uid)
-            .get(GetOptions(source: Source.serverAndCache));
+            .get();
 
         snapShot.data()!["phone_number"].toString().isNotEmpty
             ? Navigator.of(context).pushAndRemoveUntil(
-                MaterialPageRoute(builder: (builder) => HomePage()),
+                MaterialPageRoute(builder: (builder) => UserScreen()),
                 (Route<dynamic> route) => false)
             : Navigator.of(context).pushAndRemoveUntil(
-                MaterialPageRoute(builder: (builder) => UserScreen()),
+                MaterialPageRoute(builder: (builder) => HomePage()),
                 (Route<dynamic> route) => false);
       }
     } catch (e) {

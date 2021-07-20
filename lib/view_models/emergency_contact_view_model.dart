@@ -7,7 +7,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_dialogs/flutter_dialogs.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:sas_application/models/firebase_model.dart';
-import 'package:sms/sms.dart';
+import 'package:telephony/telephony.dart';
 
 class EmergencyContactViewModel extends FireBaseModel {
   final FireBaseModel _fireBaseModel = new FireBaseModel();
@@ -273,9 +273,9 @@ class EmergencyContactViewModel extends FireBaseModel {
   Future<void> onEmergencyContactAddtion(String phoneNumber) async {
     String address = phoneNumber;
     if (Platform.isAndroid) {
-      SmsSender sender = new SmsSender();
-      sender.sendSms(new SmsMessage(
-          address, "You have been added as an Emergency contact"));
+      final Telephony telephony = Telephony.instance;
+      telephony.sendSms(
+          to: address, message: "You have been added as a emergency contact");
     } else if (Platform.isIOS) {
       try {
         await sendSMS(

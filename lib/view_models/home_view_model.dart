@@ -9,10 +9,8 @@ import 'package:flutter_dialogs/flutter_dialogs.dart';
 import 'package:future_progress_dialog/future_progress_dialog.dart';
 import 'package:sas_application/models/firebase_model.dart';
 import 'package:sas_application/view_models/emergency_contact_view_model.dart';
-import 'package:sas_application/views/screens/emergency_contact.dart';
 import 'package:sas_application/views/screens/log_in.dart';
-import 'package:sms/sms.dart';
-
+import 'package:telephony/telephony.dart';
 
 class HomeViewModel extends FireBaseModel {
   final FireBaseModel _fireBaseModel = new FireBaseModel();
@@ -47,25 +45,24 @@ class HomeViewModel extends FireBaseModel {
         List<String> recipents = [];
         recipents.add(address);
         _sendSMS(message: encodedURl, recipents: recipents);
-      }
-      else{
-        SmsSender sender = new SmsSender();
-        sender.sendSms(new SmsMessage(address, encodedURl));
+      } else {
+        final Telephony telephony = Telephony.instance;
+        telephony.sendSms(to: address, message: encodedURl);
       }
     }
   }
+
   Future<void> signOutAnonymously(BuildContext context) async {
     try {
       await _fireBaseModel.auth.signOut();
       showPlatformDialog(
           context: context,
-          builder: (context) =>
-              FutureProgressDialog(getFuture(),
-                  message: Text('Signing Out.....')));
+          builder: (context) => FutureProgressDialog(getFuture(),
+              message: Text('Signing Out.....')));
       Timer(Duration(seconds: 3), () {
         Navigator.of(context).pushAndRemoveUntil(
             MaterialPageRoute(builder: (builder) => LoginPage()),
-                (Route<dynamic> route) => false);
+            (Route<dynamic> route) => false);
       });
     } catch (e) {
       print(e.toString());
@@ -79,5 +76,3 @@ class HomeViewModel extends FireBaseModel {
     });
   }
 }
-
-
