@@ -1,70 +1,54 @@
-import 'package:firebase_auth/firebase_auth.dart';
+import 'package:back_button_interceptor/back_button_interceptor.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
-import 'package:sas_application/Uniformity/Widgets.dart';
-import '../Uniformity/var_gradient.dart';
-import '../Uniformity/style.dart';
-import '../firebase_services/auth.dart';
-import '../Uniformity/custom_validator.dart';
+import 'package:flutter_dialogs/flutter_dialogs.dart';
+import 'package:sas_application/uniformity/Widgets.dart';
+import 'package:sas_application/uniformity/style.dart';
+import 'package:sas_application/uniformity/var_gradient.dart';
+import 'package:sas_application/view_models/forgot_password_view_model.dart';
+import 'package:sas_application/views/screens/log_in.dart';
+import 'package:stacked/stacked.dart';
+
+import '../../singleton_instance.dart';
 
 class ForgotPage extends StatelessWidget {
   const ForgotPage({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      body: ForgotPassword(
-        auth: Auth(),
-        id: 'Forgot Password',
-      ),
-    );
+    return ViewModelBuilder<ForgotPasswordViewModel>.reactive(
+        builder: (context, viewModel, child) => MaterialApp(
+              debugShowCheckedModeBanner: false,
+              home: ForgotPassword(
+                forgotPasswordViewModel: viewModel,
+                id: "Login State",
+                key: key,
+              ),
+            ),
+        viewModelBuilder: () => ForgotPasswordViewModel());
   }
 }
 
 class ForgotPassword extends StatefulWidget {
   final String id;
-  final AuthBase auth;
+  final ForgotPasswordViewModel forgotPasswordViewModel;
 
-  ForgotPassword({Key? key, required this.id, required this.auth});
+  ForgotPassword(
+      {Key? key, required this.id, required this.forgotPasswordViewModel});
 
   @override
   State<ForgotPassword> createState() => ForgotPasswordState();
 }
 
 class ForgotPasswordState extends State<ForgotPassword> {
+  final VarGradient _varGradient = singletonInstance<VarGradient>();
   var myEmailController = TextEditingController();
   final globalKey = GlobalKey<FormState>();
 
   String get email => myEmailController.text;
-  Future<void> _sendResetPasswordMail() async {
-    try {
-      await widget.auth.signInWithEmailAndPassword(email, 'password');
-      await widget.auth.currentUser!.reload();
-    } on FirebaseAuthException catch (e) {
-      switch (e.code) {
-        case "invalid-email":
-          final snackBar =
-              SnackBar(content: Text('This Email is invalid: $email'));
-          ScaffoldMessenger.of(context).showSnackBar(snackBar);
-          break;
-        case "wrong-password":
-          final snackBar =
-              SnackBar(content: Text('Reset Password Email is sent to $email'));
-          ScaffoldMessenger.of(context).showSnackBar(snackBar);
-          await widget.auth.forgotPasswordWithEmail(email);
-          Navigator.pop(context, true);
-          break;
-        case "user-not-found":
-          final snackBar = SnackBar(
-              content: Text('This Email does not exist in system: $email'));
-          ScaffoldMessenger.of(context).showSnackBar(snackBar);
-          break;
-      }
-    }
-  }
 
-  Widget signUpBtn() {
+  Widget signUpBtn(BuildContext context) {
     return Container(
       padding: EdgeInsets.symmetric(vertical: 25.0),
       width: double.infinity,
@@ -80,10 +64,24 @@ class ForgotPasswordState extends State<ForgotPassword> {
         ),
         onPressed: () {
           if (globalKey.currentState!.validate()) {
-            _sendResetPasswordMail();
+            widget.forgotPasswordViewModel
+                .sendResetPasswordMail(email, context);
           } else {
-            ScaffoldMessenger.of(context)
-                .showSnackBar(SnackBar(content: Text("Enter valid Email")));
+            showPlatformDialog(
+                context: context,
+                builder: (context) {
+                  return BasicDialogAlert(
+                    title: Text("Invalid E-mail"),
+                    content: Text("Enter valid Email"),
+                    actions: [
+                      BasicDialogAction(
+                          onPressed: () {
+                            Navigator.of(context).pop();
+                          },
+                          title: Text("OK"))
+                    ],
+                  );
+                });
           }
         },
         child: Text(
@@ -92,6 +90,31 @@ class ForgotPasswordState extends State<ForgotPassword> {
             color: Color(0xFF527DAA),
             letterSpacing: 1.5,
             fontSize: 18.0,
+            fontWeight: FontWeight.bold,
+            fontFamily: 'OpenSans',
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget buildRememberPasswordBtn(BuildContext context) {
+    return Container(
+      //alignment: Alignment.centerRight,
+      child: TextButton(
+        style: TextButton.styleFrom(padding: EdgeInsets.only(right: 0.0)),
+        onPressed: () => {
+          Navigator.push(
+            context,
+            MaterialPageRoute(builder: (context) => LoginPage()),
+          )
+        },
+        child: Text(
+          'Remember Password?',
+          style: TextStyle(
+            color: Colors.white,
+            letterSpacing: 1.5,
+            fontSize: 16.0,
             fontWeight: FontWeight.bold,
             fontFamily: 'OpenSans',
           ),
@@ -117,19 +140,20 @@ class ForgotPasswordState extends State<ForgotPassword> {
             controller: myEmailController,
             keyboardType: TextInputType.emailAddress,
             validator: (value) {
-              return ValidateEmail(value!).validate();
+              return widget.forgotPasswordViewModel.validateEmail(value!);
             },
             autovalidateMode: AutovalidateMode.onUserInteraction,
             style: TextStyle(
-              color: Colors.white,
+              color: Color(0xFF527DAA),
               fontFamily: 'OpenSans',
             ),
             decoration: InputDecoration(
               border: InputBorder.none,
-              contentPadding: EdgeInsets.only(top: 14.0),
+              errorStyle: errorStyle,
+              contentPadding: EdgeInsets.fromLTRB(20.0, 14.0, 20.0, 14.0),
               prefixIcon: Icon(
                 Icons.email,
-                color: Colors.white,
+                color: Color(0xFF527DAA),
               ),
               hintText: 'Enter your Email',
               hintStyle: hintTextStyle,
@@ -138,6 +162,25 @@ class ForgotPasswordState extends State<ForgotPassword> {
         ),
       ],
     );
+  }
+
+  @override
+  void initState() {
+    //State Management for Widgets
+    // TODO: implement initState
+    super.initState();
+    BackButtonInterceptor.add(myInterceptor);
+  }
+
+  bool myInterceptor(bool stopDefaultButtonEvent, RouteInfo info) {
+    return true;
+  }
+
+  @override
+  void dispose() {
+    // TODO: implement dispose
+    BackButtonInterceptor.remove(myInterceptor);
+    super.dispose();
   }
 
   @override
@@ -150,14 +193,12 @@ class ForgotPasswordState extends State<ForgotPassword> {
           onTap: () => FocusScope.of(context).unfocus(),
           child: Stack(
             children: <Widget>[
-              VarGradient(),
+              _varGradient,
               Form(
                 key: globalKey,
                 child: Padding(
-                  padding: EdgeInsets.only(right: 40.0,
-                    left: 40.0,
-                    top: 20.0,
-                    bottom: 20.0),
+                  padding: EdgeInsets.only(
+                      right: 40.0, left: 40.0, top: 20.0, bottom: 20.0),
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: <Widget>[
@@ -174,7 +215,9 @@ class ForgotPasswordState extends State<ForgotPassword> {
                       ),
                       SizedBox(height: 30.0),
                       buildEmailLoginSignup(),
-                      signUpBtn(),
+                      signUpBtn(context),
+                      SizedBox(height: 10.0),
+                      buildRememberPasswordBtn(context)
                     ],
                   ),
                 ),

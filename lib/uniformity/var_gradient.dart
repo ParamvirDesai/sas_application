@@ -1,5 +1,5 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
-import 'package:simple_animations/simple_animations.dart';
 
 class VarGradient extends StatefulWidget {
   @override
@@ -8,11 +8,27 @@ class VarGradient extends StatefulWidget {
 
 class _VarGradientState extends State<VarGradient> {
   int index = 0;
-  final tween = MultiTween();
+  @override
+  void initState() {
+    super.initState();
+    // defines a timer
+
+    Timer.periodic(Duration(milliseconds: 1200), (Timer t) {
+      if (mounted) {
+        setState(() {
+          if (index < 4) {
+            index = index + 1;
+          } else {
+            index = 0;
+          }
+        });
+      }
+    });
+  }
 
   List colorPalette = [
     [
-      Color(0xFF73AEF5),
+      Color(0xFF90CAF9),
       Color(0xFF61A4F1),
       Color(0xFF478DE0),
       Color(0xFF398AE5)
@@ -37,32 +53,27 @@ class _VarGradientState extends State<VarGradient> {
     ],
     [Color(0xFFD1C4E9), Color(0xFFB39DDB), Color(0xFF9575CD), Color(0xFF7E57C2)]
   ];
+  @override
+  void dispose() {
+    // TODO: implement dispose
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
-    return Container(
+    return AnimatedContainer(
       height: double.infinity,
       width: double.infinity,
-      child: Stack(
-        children: [
-          AnimatedContainer(
-            duration: Duration(seconds: 2),
-            onEnd: () {
-              setState(() {
-                index = index + 1;
-              });
-            }, //onEnd
-
-            decoration: BoxDecoration(
-                gradient: LinearGradient(
-              begin: Alignment.topLeft,
-              end: Alignment.bottomRight,
-              stops: [0.1, 0.4, 0.7, 0.9],
-              colors: colorPalette[index],
-            )),
-          ),
-        ],
-      ),
+      duration: Duration(seconds: 1),
+      //child: Container(decoration: ,),
+      curve: Curves.easeIn,
+      decoration: BoxDecoration(
+          gradient: LinearGradient(
+        begin: Alignment.topLeft,
+        end: Alignment.bottomRight,
+        stops: [0.1, 0.4, 0.7, 0.9],
+        colors: colorPalette[index],
+      )),
     );
   }
 }
